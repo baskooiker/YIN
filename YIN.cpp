@@ -18,10 +18,10 @@ using namespace std;
 void YIN::defaultValues(){
     dimensions = 3;
 
-    maxdelay = 100;
+    maxdelay = 200;
     length = 60;
-    avgThreshold = 0.7f;
-    dipThreshold = 0.7f;
+    avgThreshold = 0.2f;
+    dipThreshold = 0.1f;
 
     minDips = 2;
     sync = false;
@@ -141,7 +141,9 @@ void YIN::process(vector<float> v) {
     int minimumIndex = -1;
     float minimumValue = 1.;
 
-    float dips[2] = {-1., -1.};
+    float dips[minDips];
+    for(int i = 0; i < minDips; i++)
+        dips[i] = -1.f;
     int detectedDips = 0;
 
     for (int i = 0; i < maxdelay && detectedDips < minDips; i++) {
