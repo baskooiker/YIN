@@ -6,12 +6,13 @@
  */
 
 #include "YIN.h"
-#include "../utils/utils.h"
+#include "utils.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
 #include <float.h>
+#include <vector>
 
 using namespace std;
 
@@ -26,10 +27,6 @@ void YIN::defaultValues(){
     minDips = 2;
     sync = false;
 
-    buffers = NULL;
-    dimvalues = NULL;
-    values = NULL;
-    avgs = NULL;
 }
 
 YIN::YIN(int dims) {
@@ -58,52 +55,36 @@ YIN::~YIN() {
 }
 
 void YIN::cleanUP() {
-    if (buffers) {
-        for (int i = 0; i < dimensions; i++) {
-            delete[] buffers[i];
-            delete[] dimvalues[i];
-        }
-        delete[] buffers;
-        delete[] dimvalues;
-    }
-
-    if (values)
-        delete[] values;
-    if (avgs)
-        delete[] avgs;
-
+    for(int i = 0; i < buffers.size(); i++)
+        buffers[i].clear();
+    buffers.clear();
+    for(int i = 0; i < dimvalues.size(); i++)
+        dimvalues[i].clear();
+    dimvalues.clear();
+    values.clear();
+    avgs.clear();
 }
 
 void YIN::init() {
     cleanUP();
     buffersize = maxdelay + length + 1;
 
-    buffers = new float*[dimensions];
-    dimvalues = new float*[dimensions];
-
-    for (int i = 0; i < dimensions; i++) {
-        buffers[i] = new float[buffersize];
-        for (int j = 0; j < buffersize; j++)
-            buffers[i][j] = 0.0f;
-
-        dimvalues[i] = new float[maxdelay];
-        for (int j = 0; j < maxdelay; j++)
-            dimvalues[i][j] = 0.0f;
+    buffers.clear();
+    dimvalues.clear();
+    for(int i = 0; i < dimensions; i++){
+        buffers.push_back(deque<float>(buffersize, 0.));
+        dimvalues.push_back(vector<float>(maxdelay, 0.));
     }
-
-    values = new float[maxdelay];
-    avgs = new float[maxdelay];
-    for (int j = 0; j < maxdelay; j++) {
-        values[j] = 0.0f;
-        avgs[j] = 0.0f;
-    }
+    
+    values = vector<float>(maxdelay, 0.);
+    avgs = vector<float>(maxdelay, 0.);
 }
 
-float YIN::r(int t, int delta, float* buffer) {
+float YIN::r(int t, int delta, deque<float> buffer) {
     float sum = 0.0f;
     int i;
     for (i = 0; i < length; i++)
-        sum += (*(buffer + i + t)) * (*(buffer + i + t + delta));
+        sum += buffer[i + t] * buffer[i + t + delta];
     return sum / length;
 }
 
@@ -113,9 +94,9 @@ void YIN::process(vector<float> v) {
 
     // shift and add to buffer
     for (int i = 0; i < dimensions; i++) {
-        for (int j = buffersize - 1; j > 0; j--)
-            buffers[i][j] = buffers[i][j - 1];
-        buffers[i][0] = v[i];
+        buffers[i].push_front(v[i]);
+        if(buffers[i].size() > buffersize)
+            buffers[i].pop_back();
     }
 
     // compute values
@@ -128,7 +109,7 @@ void YIN::process(vector<float> v) {
 
     // cmndf
     for (int i = 0; i < dimensions; i++)
-        cmndf(dimvalues[i], maxdelay);
+        dimvalues[i] = cmndf(dimvalues[i], maxdelay);
 
     values[0] = 0.0f;
     for (int j = 1; j < maxdelay; j++) {
@@ -178,7 +159,7 @@ void YIN::process(vector<float> v) {
 
 }
 
-float* YIN::getYIN() {
+vector<float> YIN::getYIN() {
     return values;
 }
 
@@ -238,7 +219,7 @@ float YIN::getDipThreshold() {
     return dipThreshold;
 }
 
-float* YIN::getAvgs() {
+vector<float> YIN::getAvgs() {
     return avgs;
 }
 

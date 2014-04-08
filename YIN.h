@@ -9,6 +9,7 @@
 #define	YIN_H
 
 #include <vector>
+#include <deque>
 
 using namespace std;
 
@@ -38,17 +39,21 @@ public:
     int getMinDips();
     
     // getters for values
-    float* getAvgs();
+    vector<float> getAvgs();
     float getAvg();
     int getLength();
-    float* getYIN();
+    vector<float> getYIN();
     bool isSync();
     
 private:
-    float* values;
-    float* avgs;
-    float** buffers;
-    float** dimvalues;
+//    float* values;
+//    float* avgs;
+//    float** buffers;
+//    float** dimvalues;
+    vector<float> values;
+    vector<float> avgs;
+    vector<deque<float> > buffers;
+    vector<vector<float> > dimvalues;
 
     int buffersize, maxdelay, length, dimensions, dip;
     float avgThreshold, dipThreshold, avg;
@@ -59,7 +64,7 @@ private:
     void init();
     void defaultValues();
     void cleanUP();
-    float r(int t, int delta, float* buffer);
+    float r(int t, int delta, deque<float> buffer);
 };
 
 #endif	/* YIN_H */

@@ -19,7 +19,7 @@ using namespace std;
  * 
  */
 int main(int argc, char** argv) {
-
+    
     YIN* yin = new YIN(1);
     yin->setAverageThreshold(.07);
     yin->setDipThreshold(.07);
