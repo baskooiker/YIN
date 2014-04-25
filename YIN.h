@@ -20,7 +20,7 @@ public:
     YIN(const YIN& orig);
     virtual ~YIN();
 
-    void process(vector<float>);
+    void process(const vector<float>&);
     void clear();
     
     // setters
@@ -64,7 +64,7 @@ private:
     void init();
     void defaultValues();
     void cleanUP();
-    float r(int t, int delta, deque<float> buffer);
+    float r(int t, int delta, deque<float> &buffer);
 };
 
 #endif	/* YIN_H */

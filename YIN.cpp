@@ -80,7 +80,7 @@ void YIN::init() {
     avgs = vector<float>(maxdelay, 0.);
 }
 
-float YIN::r(int t, int delta, deque<float> buffer) {
+float YIN::r(int t, int delta, deque<float> &buffer) {
     float sum = 0.0f;
     int i;
     for (i = 0; i < length; i++)
@@ -88,7 +88,7 @@ float YIN::r(int t, int delta, deque<float> buffer) {
     return sum / length;
 }
 
-void YIN::process(vector<float> v) {
+void YIN::process(const vector<float> &v) {
     if (v.size() != dimensions)
         return;
 
